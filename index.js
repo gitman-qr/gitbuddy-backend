@@ -21,11 +21,10 @@ app.use(cors());
 
 // MiddleWare to use json
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 const authRoutes = require("./routes/auth");
 
 app.use("/app/user", authRoutes);
-// Index Route
 app.get("/", (req, res) => {
   res.send({
     msg: "Hello there this app is working totally fine",
