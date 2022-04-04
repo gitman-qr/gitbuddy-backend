@@ -1,12 +1,6 @@
 const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    min: 4,
-    max: 255,
-  },
-  email: {
+  username: {
     type: String,
     required: true,
     min: 4,
@@ -18,6 +12,16 @@ const userSchema = new mongoose.Schema({
     min: 6,
     max: 1024,
   },
+  number: {
+    type: String,
+    min: 7,
+    max: 11,
+  },
+  address: {
+    type: String,
+    min: 4,
+    max: 1024,
+  },
   date: {
     type: Date,
     default: Date.now,
@@ -25,4 +29,4 @@ const userSchema = new mongoose.Schema({
 });
 
 // Register the schema as a model
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("akshat-db", userSchema);

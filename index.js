@@ -1,22 +1,30 @@
+const env = require("dotenv").config();
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const mongoose = require("mongoose");
-const env = require("dotenv").config();
 // Import routes
-const authRoutes = require("./routes/auth");
+mongoose.connect(
+  process.env.DATABASE_URI,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
+  (err) => {
+    if (err) console.log(err);
+    else console.log("mongdb is connected");
+  }
+);
 
-// Connnect to Database using mongoose
-mongoose.connect(process.env.MONGODB_URI, () => {
-  console.log("Connected to Db");
-});
+const cors = require("cors");
+app.use(cors());
 
 // MiddleWare to use json
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const authRoutes = require("./routes/auth");
 
 app.use("/app/user", authRoutes);
-// Index Route
 app.get("/", (req, res) => {
   res.send({
     msg: "Hello there this app is working totally fine",

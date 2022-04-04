@@ -9,29 +9,29 @@ router.get("/register", (req, res) => {
   res.send("try to send a post request");
 });
 router.post("/register", async (req, res) => {
-  // Validate the data
+  console.log(req.body);
   const { error, value } = registerValidation(req.body);
-  if (error) res.status(400).send(error.details[0].message);
+  if (error) {
+    res.status(400).send({ error: error.details[0].message });
+    return;
+  }
 
-  // Check if the user already exists
-  const emailExists = await User.findOne({ email: req.body.email });
-  if (emailExists) return res.status(400).send("Email already exists");
+  const usernameExists = await User.findOne({ username: req.body.username });
+  if (usernameExists)
+    return res.status(400).send({ error: "username already exists" });
 
-  // Hash the password
-  // It took me a while to figure out how to do this.
-  // Salt must be integer and bcrypt is responding with a string
   const salt = bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, parseInt(salt));
 
-  // Create New User
   const user = new User({
-    name: req.body.name,
-    email: req.body.email,
+    username: req.body.username,
+    number: req.body.number,
+    address: req.body.address,
     password: hashedPassword,
   });
   try {
     const savedUser = await user.save();
-    res.send({ user: savedUser._id });
+    return res.send({ user: savedUser._id });
   } catch (err) {
     console.log(err);
     res.status(404).send(err);
@@ -39,26 +39,25 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  // Validate the data
   const { error, value } = loginValidation(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-  const { email, password } = req.body;
+  if (error) {
+    res.status(400).send({ error: error.details[0].message });
+    return;
+  }
+  const { username, password } = req.body;
 
-  // Validating the email
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ username: username });
   if (!user) {
-    return res.status(400).send("Email or password is wrong");
+    return res.status(400).send({ error: "username or password is wrong" });
   }
 
-  // Validating the passowrd
   const validPass = await bcrypt.compare(password, user.password);
   if (!validPass) {
-    return res.status(400).send("Email or password is wrong");
+    return res.status(400).send({ error: "username or password is wrong" });
   }
 
-  // Create a token
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
-  res.header("auth-token", token).send(token);
+  return res.header("auth-token", token).send({ user: token });
 });
 
 module.exports = router;
